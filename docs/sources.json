@@ -5,13 +5,15 @@
     "url": "https://www.mdpi.com/2076-3417/15/10/5731",
     "chapters": [
       1,
+      2,
       3,
       4,
+      5,
       6
     ],
-    "status": "planned",
-    "local_file": null,
-    "verified_on": null
+    "status": "verified",
+    "local_file": "raw/S01.pdf",
+    "verified_on": "2026-11-21"
   },
   {
     "id": "S02",
@@ -21,9 +23,9 @@
       2,
       4
     ],
-    "status": "planned",
-    "local_file": null,
-    "verified_on": null
+    "status": "verified",
+    "local_file": "raw/S02.pdf",
+    "verified_on": "2026-11-21"
   },
   {
     "id": "S03",
@@ -33,9 +35,9 @@
       3,
       5
     ],
-    "status": "planned",
-    "local_file": null,
-    "verified_on": null
+    "status": "verified",
+    "local_file": "raw/S03.pdf",
+    "verified_on": "2026-11-21"
   },
   {
     "id": "S04",
@@ -46,9 +48,9 @@
       5,
       6
     ],
-    "status": "planned",
-    "local_file": null,
-    "verified_on": null
+    "status": "verified",
+    "local_file": "raw/S04.pdf",
+    "verified_on": "2026-11-21"
   },
   {
     "id": "S05",
@@ -57,9 +59,9 @@
     "chapters": [
       4
     ],
-    "status": "planned",
-    "local_file": null,
-    "verified_on": null
+    "status": "verified",
+    "local_file": "raw/S05.pdf",
+    "verified_on": "2026-11-21"
   },
   {
     "id": "S06",
@@ -69,9 +71,9 @@
       5,
       6
     ],
-    "status": "planned",
-    "local_file": null,
-    "verified_on": null
+    "status": "verified",
+    "local_file": "raw/S06.pdf",
+    "verified_on": "2026-11-21"
   },
   {
     "id": "S07",
@@ -82,8 +84,8 @@
       4,
       6
     ],
-    "status": "planned",
-    "local_file": null,
-    "verified_on": null
+    "status": "verified",
+    "local_file": "raw/S07.pdf",
+    "verified_on": "2026-11-21"
   }
 ]

@@ -3,17 +3,17 @@
 ## Purpose
 A beginner-friendly, source-grounded knowledge base for Speech Emotion Recognition (SER).
 
-## Planned chapters
+## Chapters
 
-1. SER fundamentals — pending ingestion
-2. Acoustic signals and features — pending ingestion
-3. Emotion representations — pending ingestion
-4. Models and learned representations — pending ingestion
-5. Datasets and evaluation — pending ingestion
-6. Applications and limitations — pending ingestion
+1. [SER fundamentals](concepts/ser-fundamentals.md)
+2. [Acoustic signals and features](concepts/acoustic-features.md)
+3. [Emotion representations](concepts/emotion-representations.md)
+4. [Models and learned representations](models/ser-models.md)
+5. [Datasets and evaluation](datasets/datasets-and-evaluation.md)
+6. [Applications and limitations](concepts/ser-limitations.md)
 
 ## Source status
-See [`docs/sources.json`](../docs/sources.json) for the authoritative ingest status. **No claims have yet been extracted or verified from the seven candidate papers.**
+Verified sources include [S01](sources/S01.md), [S02](sources/S02.md), [S03](sources/S03.md), [S04](sources/S04.md), [S05](sources/S05.md), [S06](sources/S06.md), [S07](sources/S07.md). See [the registry](../docs/sources.json) for all seven source statuses.
 
 ## Editorial guideline
 Every substantive factual claim should link to a Wiki source record `[Sxx]` and, when possible, a paper section/page. Do not conflate acoustic correlates with direct measurement of emotion.
