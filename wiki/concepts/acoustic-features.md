@@ -14,6 +14,6 @@ A functional turns a sequence of measurements into a summary, such as a mean, mi
 
 A spectrogram shows how the distribution of signal strength across frequencies changes over time. Each short frame contributes a spectrum. A mel-spectrogram groups frequencies into bands on the mel scale. [S01](../sources/S01.md), §§3.2–3.4, pp. 6–7.
 
-A spectral descriptor summarizes some aspect of energy across frequencies. For example, spectral spread describes how widely spectral components are distributed. Cepstral descriptors such as MFCCs give a transformed view of the short-term spectrum. [S07](../sources/S07.md), §§2.1–2.2, pp. 5–6.
+MFCCs give a compact, transformed summary of a frame’s mel spectrum. Another feature, spectral spread, describes how widely frequencies are distributed. [S07](../sources/S07.md), §§2.1–2.2, pp. 5–6.
 
 See [Models and learned representations](../models/ser-models.md) for how acoustic features can feed a classifier.
