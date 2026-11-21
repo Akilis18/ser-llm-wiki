@@ -1,2 +1,210 @@
 <!doctype html>
-<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SER LLM Wiki — Slides Pending</title><style>body{font:1.1rem system-ui,sans-serif;max-width:52rem;margin:10vh auto;padding:1.5rem;line-height:1.8;color:#182335;background:#f9fbff}main{background:white;border:1px solid #dce3ee;border-radius:18px;padding:2rem}small{color:#64748b}</style></head><body><main><small>STAGE 1 / REPOSITORY SCAFFOLD</small><h1>AI 如何聽出情緒？</h1><p>這是簡報部署用的佔位頁，並非已完成的教學簡報。</p><p>完成至少五篇文獻的實際 ingest 與 Wiki 驗證後，才會依 Wiki 知識製作完整 HTML 簡報。</p></main></body></html>
+<!-- Generated from data/slide-content.json using scripts/build_presentation.py. -->
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>AI 如何聽出情緒？從聲音特徵到深度學習的語音情緒辨識入門</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="presentation.css">
+  <script defer src="presentation.js"></script>
+</head>
+<body>
+  <a class="skip" href="#presentation">跳至簡報內容</a>
+  <header class="site-header">
+    <a class="wordmark" href="#slide-1"><span aria-hidden="true">◈</span> 語音情緒辨識入門</a>
+    <details class="contents"><summary>投影片目錄</summary><ol><li><a href="#slide-1">課程導覽</a></li><li><a href="#slide-2">同一句話，兩種辨識任務</a></li><li><a href="#slide-3">波形與取樣</a></li><li><a href="#slide-4">音高、能量、時間與 MFCC</a></li><li><a href="#slide-5">用類別或尺度表示情緒</a></li><li><a href="#slide-6">傳統方法：先抽特徵，再分類</a></li><li><a href="#slide-7">深度學習：從輸入學特徵</a></li><li><a href="#slide-8">wav2vec 2.0：先預訓練，再適配任務</a></li><li><a href="#slide-9">RAVDESS 與 IEMOCAP</a></li><li><a href="#slide-10">評估：Accuracy、Precision、Recall 與 F1</a></li><li><a href="#slide-11">真實環境中的限制</a></li><li><a href="#slide-12">總結、小測驗與參考資料</a></li></ol></details>
+  </header>
+  <main id="presentation" tabindex="-1">
+    <article class="slide opening" id="slide-1" aria-labelledby="heading-1">
+      <header class="slide-header">
+        <h1 id="heading-1" tabindex="-1">AI 如何聽出情緒？從聲音特徵到深度學習的語音情緒辨識入門</h1>
+        <p>從一段錄音出發，依序認識聲音特徵、情緒標註、模型與評估。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives" open><summary>學習目標</summary><ul><li>用自己的話說明語音情緒辨識在做什麼。</li><li>預覽從聲音到模型評估的學習路線。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-01.1"><p class="statement">語音情緒辨識（Speech Emotion Recognition, SER）利用語音線索估計說話時表現出的情緒。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §1, pp. 1–2 and §4, p. 8</p><code>wiki/concepts/ser-fundamentals.md#L1</code><blockquote lang="en">Speech emotion recognition (SER) uses cues in speech to estimate expressed emotion. Automatic speech recognition (ASR) identifies the sequence of sounds and words spoken. The same recording can be input to either task, with different outputs. [S01], §1, pp. 1–2 and §4, p. 8.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="教學示意">
+          <h3>教學示意</h3><div class="hero-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><ol class="flow" aria-label="課程路線"><li>音訊</li><li>表示</li><li>模型</li><li>評估</li></ol><p class="visual-note">四站式路線圖：音訊 → 表示 → 模型 → 評估。</p>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-2" aria-labelledby="heading-2">
+      <header class="slide-header">
+        <h2 id="heading-2" tabindex="-1">同一句話，兩種辨識任務</h2>
+        <p>先問「說了什麼」，再問「這段聲音聽起來如何」。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>區分 SER 與 ASR 的輸出。</li><li>說明聲音線索為何需要合併解讀。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-02.1"><p class="statement">自動語音辨識（Automatic Speech Recognition, ASR）辨識說出的語音與詞語序列。同一段錄音可以用於 SER 和 ASR。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §1, pp. 1–2 and §4, p. 8</p><code>wiki/concepts/ser-fundamentals.md#L1</code><blockquote lang="en">Speech emotion recognition (SER) uses cues in speech to estimate expressed emotion. Automatic speech recognition (ASR) identifies the sequence of sounds and words spoken. The same recording can be input to either task, with different outputs. [S01], §1, pp. 1–2 and §4, p. 8.</blockquote></details></div></li><li class="claim" id="claim-02.2"><p class="statement">音高、訊號強度與說話的時間變化都可能提供線索。高音高可以伴隨不同的高喚起情緒，單靠音高無法判定情緒類別。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §§2.2–2.3, pp. 3–4</p><code>wiki/concepts/ser-fundamentals.md#L1</code><blockquote lang="en">The review describes changes in fundamental frequency (F0), signal intensity, and timing as cues that can vary with emotion in complex ways. It discusses higher average F0 in high-arousal speech and gives both anger and happiness as examples. A higher pitch alone therefore gives no unique emotion label. [S01], §§2.2–2.3, pp. 3–4.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="假想情境">
+          <h3>假想情境</h3><p class="visual-note">想像同一句「我知道了」用兩種語氣說出來。請先寫下相同的文字，再圈出你想比較的聲音線索。</p>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-3" aria-labelledby="heading-3">
+      <header class="slide-header">
+        <h2 id="heading-3" tabindex="-1">波形與取樣</h2>
+        <p>從整段聲音縮小到一小段，看看電腦如何整理輸入。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>說明波形、取樣率和音框的關係。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-03.1"><p class="statement">數位波形是一串音訊樣本。取樣率是每秒的樣本數。音框（frame）把相鄰的樣本分成一小段供分析。</p><div class="citation"><a class="source" href="#ref-S02">[S02]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S02">[S02]</a> §§3 and 5, pp. 1460–1462</p><code>wiki/concepts/acoustic-features.md#L3</code><blockquote lang="en">A digital waveform is a sequence of audio samples. A frame groups adjacent samples for analysis. The sampling rate gives the number of samples per second. The paper illustrates how the toolkit groups samples into frames for pitch estimation. [S02], §§3 and 5, pp. 1460–1462.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="模擬波形">
+          <h3>模擬波形</h3><canvas id="waveform" role="img" aria-label="模擬波形示意圖">模擬波形：以樣本點表示訊號。</canvas><div class="axis-caption">時間 →</div><div class="controls"><label class="range" for="frequency"><span>頻率（每視窗週期數）</span><output id="frequency-value" for="frequency">3</output><input id="frequency" type="range" min="1" max="8" value="3" disabled></label><label class="range" for="amplitude"><span>振幅（相對值）</span><output id="amplitude-value" for="amplitude">65</output><input id="amplitude" type="range" min="10" max="100" value="65" disabled></label></div><noscript><p>啟用 JavaScript 可操作波形控制。範例設定為 3 個週期，振幅 65%。</p></noscript><p class="visual-note">用時間軸上的點表示樣本，再用方框圈出一組相鄰的點。圖為示意。</p>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-4" aria-labelledby="heading-4">
+      <header class="slide-header">
+        <h2 id="heading-4" tabindex="-1">音高、能量、時間與 MFCC</h2>
+        <p>對照同一段音訊的不同表示，辨認每種表示保留哪些資訊。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>分辨常見的聲學特徵。</li><li>比較梅爾頻譜圖與 MFCC 所呈現的資訊。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-04.1"><p class="statement">基頻（F0）與感知到的音高有關。均方根能量概括音框內的訊號幅度。</p><div class="citation"><a class="source" href="#ref-S02">[S02]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S02">[S02]</a> §4, pp. 1460–1461, Table 1</p><code>wiki/concepts/acoustic-features.md#L3</code><blockquote lang="en">Examples of frame descriptors include fundamental frequency (F0), which relates to perceived pitch, and root-mean-square energy, which summarizes signal magnitude over a frame. The toolkit also computes mel-frequency cepstral coefficients (MFCCs). [S02], §4, pp. 1460–1461, Table 1.</blockquote></details></div></li><li class="claim" id="claim-04.2"><p class="statement">說話的時間變化也是情緒線索之一。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §§2.2–2.3, pp. 3–4</p><code>wiki/concepts/ser-fundamentals.md#L1</code><blockquote lang="en">The review describes changes in fundamental frequency (F0), signal intensity, and timing as cues that can vary with emotion in complex ways. It discusses higher average F0 in high-arousal speech and gives both anger and happiness as examples. A higher pitch alone therefore gives no unique emotion label. [S01], §§2.2–2.3, pp. 3–4.</blockquote></details></div></li><li class="claim" id="claim-04.3"><p class="statement">梅爾頻譜圖（mel spectrogram）呈現各梅爾頻帶的訊號強度如何隨時間變化。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §§3.2–3.4, pp. 6–7</p><code>wiki/concepts/acoustic-features.md#L13</code><blockquote lang="en">A spectrogram shows how the distribution of signal strength across frequencies changes over time. Each short frame contributes a spectrum. A mel-spectrogram groups frequencies into bands on the mel scale. [S01], §§3.2–3.4, pp. 6–7.</blockquote></details></div></li><li class="claim" id="claim-04.4"><p class="statement">梅爾頻率倒譜係數（MFCCs）是對單一音框的梅爾頻譜進行轉換後得到的精簡表示。</p><div class="citation"><a class="source" href="#ref-S07">[S07]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S07">[S07]</a> §§2.1–2.2, pp. 5–6</p><code>wiki/concepts/acoustic-features.md#L13</code><blockquote lang="en">MFCCs give a compact, transformed summary of a frame’s mel spectrum. Another feature, spectral spread, describes how widely frequencies are distributed. [S07], §§2.1–2.2, pp. 5–6.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="教學示意">
+          <h3>教學示意</h3><p class="visual-note">把示意波形與梅爾頻譜圖並排，再畫一個小向量代表某個音框的 MFCC。</p>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-5" aria-labelledby="heading-5">
+      <header class="slide-header">
+        <h2 id="heading-5" tabindex="-1">用類別或尺度表示情緒</h2>
+        <p>試著用一個名稱與兩個尺度描述同一段聲音。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>區分類別式與維度式標註。</li><li>用愉悅度與喚起度描述假想聲音。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-05.1"><p class="statement">類別式表示使用命名的標籤，例如生氣、喜悅或悲傷。資料集也可以設有中性類別。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §2, pp. 2–3</p><code>wiki/concepts/emotion-representations.md#L1</code><blockquote lang="en">- Categorical outputs use named labels, such as anger, joy, or sadness. A dataset can also define a neutral class. [S01], §2, pp. 2–3. - Dimensional outputs use ratings on scales. Valence describes pleasantness, and arousal describes activation or intensity. Some representations add dominance, a dimension related to control. [S01], §2.1, p. 3.</blockquote></details></div></li><li class="claim" id="claim-05.2"><p class="statement">維度式表示使用尺度評分。愉悅度（valence）描述愉悅程度，喚起度（arousal）描述活化或強烈程度。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §2.1, p. 3</p><code>wiki/concepts/emotion-representations.md#L1</code><blockquote lang="en">- Categorical outputs use named labels, such as anger, joy, or sadness. A dataset can also define a neutral class. [S01], §2, pp. 2–3. - Dimensional outputs use ratings on scales. Valence describes pleasantness, and arousal describes activation or intensity. Some representations add dominance, a dimension related to control. [S01], §2.1, p. 3.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="假想情境">
+          <h3>假想情境</h3><div class="affect-plot" role="img" aria-label="愉悅度與喚起度示意座標，示意點位於中心"><span class="affect-high">高喚起</span><span class="affect-low">低喚起</span><span class="affect-left">較不愉悅</span><span class="affect-right">較愉悅</span><i class="affect-example affect-example-left" aria-hidden="true"></i><i class="affect-example affect-example-right" aria-hidden="true"></i><i id="affect-point"></i></div><p class="axis-caption">空心點是兩個示意位置。用滑桿移動實心點。</p><div class="controls"><label class="range" for="valence"><span>愉悅度（Valence）</span><output id="valence-value" for="valence">0</output><input id="valence" type="range" min="-100" max="100" value="0" disabled></label><label class="range" for="arousal"><span>喚起度（Arousal）</span><output id="arousal-value" for="arousal">0</output><input id="arousal" type="range" min="-100" max="100" value="0" disabled></label></div><p class="visual-note">在雙軸圖上放兩個假想點：兩個點的喚起度都高，一個較愉悅、另一個較不愉悅。</p>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-6" aria-labelledby="heading-6">
+      <header class="slide-header">
+        <h2 id="heading-6" tabindex="-1">傳統方法：先抽特徵，再分類</h2>
+        <p>跟著一段錄音走完特徵擷取到情緒預測的流程。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>依序說出特徵擷取、摘要與分類。</li><li>辨認 openSMILE 與 SVM 的角色。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-06.1"><p class="statement">傳統流程先把語音轉成數值特徵，再由分類器判斷類別。支援向量機（SVM）可學習區隔情緒類別的邊界。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §4 and §4.3, p. 8</p><code>wiki/models/ser-models.md#L3</code><blockquote lang="en">In the traditional pipeline described by the review, a front end turns speech into numerical features and a back end classifies the resulting representation. A support vector machine (SVM), for example, can learn a boundary between examples of one emotion class and the remaining classes. [S01], §4 and §4.3, p. 8.</blockquote></details></div></li><li class="claim" id="claim-06.2"><span class="claim-kind">研究方法</span><p class="statement">openSMILE 可以計算音框特徵與摘要，再輸出特徵或傳給後續元件。</p><div class="citation"><a class="source" href="#ref-S02">[S02]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S02">[S02]</a> §§3–5, pp. 1460–1462</p><code>wiki/models/ser-models.md#L15</code><blockquote lang="en">openSMILE uses configurable components to read audio, compute frame-level descriptors and summaries, and export features or pass data to a downstream component. The paper’s benchmark times feature extraction itself. [S02], §§3–5, pp. 1460–1462.</blockquote></details></div></li><li class="claim" id="claim-06.3"><p class="statement">統計摘要可以把一連串音高量測整理成平均值、最小值或最大值。</p><div class="citation"><a class="source" href="#ref-S02">[S02]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S02">[S02]</a> §§2–4, pp. 1460–1461, Fig. 1 and Table 2</p><code>wiki/concepts/acoustic-features.md#L9</code><blockquote lang="en">A functional turns a sequence of measurements into a summary, such as a mean, minimum, or maximum. In the toolkit’s example, a pitch descriptor is computed on frames and then summarized across frames. [S02], §§2–4, pp. 1460–1461, Fig. 1 and Table 2.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="教學示意">
+          <h3>教學示意</h3><ol class="flow" aria-label="SER 流程"><li>錄音</li><li>音框特徵</li><li>統計摘要</li><li>SVM</li><li>預測標籤</li></ol><div class="pipeline" aria-label="查看流程說明"><details><summary>特徵擷取</summary><p>openSMILE 可以計算音框特徵與摘要，再輸出特徵或傳給後續元件。</p></details><details><summary>統計摘要</summary><p>統計摘要可以把一連串音高量測整理成平均值、最小值或最大值。</p></details><details><summary>分類</summary><p>傳統流程先把語音轉成數值特徵，再由分類器判斷類別。支援向量機（SVM）可學習區隔情緒類別的邊界。</p></details></div><p class="visual-note">畫出「錄音 → 音框特徵 → 統計摘要 → SVM → 預測標籤」的示意流程。</p>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-7" aria-labelledby="heading-7">
+      <header class="slide-header">
+        <h2 id="heading-7" tabindex="-1">深度學習：從輸入學特徵</h2>
+        <p>用局部觀察與沿時間保留資訊這兩個角度理解模型。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>用自己的話比較 CNN 與 LSTM。</li><li>辨認波形模型與人工特徵流程的輸入差異。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-07.1"><p class="statement">波形模型可接收音訊樣本，由前面的網路層學習表示。</p><div class="citation"><a class="source" href="#ref-S07">[S07]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S07">[S07]</a> §§2–3, pp. 5–7 and §9, p. 22</p><code>wiki/models/ser-models.md#L29</code><blockquote lang="en">A waveform model takes audio samples as input and learns its own representation in its early layers. Gudivaka and colleagues propose combining learned waveform representations with structured features for children’s speech, where labeled data are scarce. [S07], §§2–3, pp. 5–7 and §9, p. 22.</blockquote></details></div></li><li class="claim" id="claim-07.2"><p class="statement">卷積神經網路（CNN）用小型濾波器偵測局部模式。長短期記憶網路（LSTM）用記憶狀態和閘門在序列中傳遞資訊。</p><div class="citation"><a class="source" href="#ref-S07">[S07]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S07">[S07]</a> §§5.1 and 5.2.1, pp. 10–11</p><code>wiki/models/ser-models.md#L29</code><blockquote lang="en">A convolutional neural network (CNN) uses small filters to detect local patterns in inputs such as a waveform or spectrogram. A long short-term memory network (LSTM) uses a memory state and gates to pass information along a sequence. [S07], §§5.1 and 5.2.1, pp. 10–11.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="教學示意">
+          <h3>教學示意</h3><p class="visual-note">用移動的小方框比喻 CNN 的局部觀察，用一列依序傳遞的方框示意 LSTM。</p>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-8" aria-labelledby="heading-8">
+      <header class="slide-header">
+        <h2 id="heading-8" tabindex="-1">wav2vec 2.0：先預訓練，再適配任務</h2>
+        <p>把模型學習語音表示的階段，和之後使用表示的任務分開看。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>說明遮蔽訓練的基本想法。</li><li>分辨原始 ASR 研究與下游 SER 用法。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-08.1"><span class="claim-kind">研究方法</span><p class="statement">原始 wav2vec 2.0 先用卷積編碼器和 Transformer 建立含上下文的語音表示。預訓練會遮住部分編碼輸出，讓模型從候選項辨認正確的離散表示。</p><div class="citation"><a class="source" href="#ref-S05">[S05]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S05">[S05]</a> §2, Fig. 1 and §§3.1–3.2, pp. 2–3</p><code>wiki/models/ser-models.md#L21</code><blockquote lang="en">A convolutional encoder turns raw audio into short-time representations, and a Transformer builds representations using sequence context. During pretraining, some encoder outputs are masked and the model learns to select the matching discrete representation from distractors. [S05], §2, Fig. 1 and §§3.1–3.2, pp. 2–3.</blockquote></details></div></li><li class="claim" id="claim-08.2"><span class="claim-kind">研究方法</span><p class="statement">原始研究以有文字標註的語音微調模型，目標是語音轉寫（ASR）。</p><div class="citation"><a class="source" href="#ref-S05">[S05]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S05">[S05]</a> §3.3, p. 4</p><code>wiki/models/ser-models.md#L21</code><blockquote lang="en">The authors fine-tuned for transcription on labeled speech using connectionist temporal classification (CTC). [S05], §3.3, p. 4.</blockquote></details></div></li><li class="claim" id="claim-08.3"><span class="claim-kind">研究方法</span><p class="statement">Wiki 介紹的下游 SER 例子會用池化（pooling）把各音框的表示合成整段表示，再預測情緒標籤。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §7.3, pp. 14–15</p><code>wiki/models/ser-models.md#L7</code><blockquote lang="en">The review describes learning general speech representations from unlabeled audio through self-supervised pretraining and then adapting the model to labeled SER examples. In one wav2vec 2.0 downstream example, pooling combines the encoder’s frame-level outputs into a representation of the whole clip, which a classifier uses to predict an emotion label. [S01], §7.3, pp. 14–15.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="教學示意">
+          <h3>教學示意</h3><ol class="flow" aria-label="原始 ASR 研究"><li>預訓練編碼器</li><li>語音轉寫（ASR）</li></ol><ol class="flow" aria-label="下游 SER 示意"><li>預訓練編碼器</li><li>池化與分類</li><li>情緒標籤（SER）</li></ol><p class="visual-note">兩條支線：預訓練編碼器 → 語音轉寫；預訓練編碼器 → 池化與分類 → 情緒標籤。</p>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-9" aria-labelledby="heading-9">
+      <header class="slide-header">
+        <h2 id="heading-9" tabindex="-1">RAVDESS 與 IEMOCAP</h2>
+        <p>先比較錄音怎麼來，再想一想資料怎麼分。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>比較兩個資料集如何產生語音。</li><li>說明為什麼要留出整組說話者做測試。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-09.1"><span class="claim-kind">研究方法</span><p class="statement">RAVDESS 的演員以固定句子錄製說話及歌唱，提供影音、僅影像與僅音訊三種版本。</p><div class="citation"><a class="source" href="#ref-S03">[S03]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S03">[S03]</a> Description of RAVDESS files, p. 11 and Table 1</p><code>wiki/datasets/datasets-and-evaluation.md#L3</code><blockquote lang="en">Twenty-four actors performed two fixed statements in a controlled speech-and-song dataset. The same performance was exported in audio-video, video-only, and audio-only forms. [S03], Description of RAVDESS files, p. 11 and Table 1.</blockquote></details></div></li><li class="claim" id="claim-09.2"><span class="claim-kind">研究方法</span><p class="statement">IEMOCAP 由演員兩兩錄音，包含照稿對話，也包含依情境提示即興的對話。</p><div class="citation"><a class="source" href="#ref-S04">[S04]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S04">[S04]</a> §§3.1–3.2, manuscript pp. 6–8</p><code>wiki/datasets/datasets-and-evaluation.md#L15</code><blockquote lang="en">Ten actors were recorded in five paired sessions. The design included scripted dialogue and improvisation prompted by hypothetical scenarios. [S04], §§3.1–3.2, manuscript pp. 6–8.</blockquote></details></div></li><li class="claim" id="claim-09.3"><span class="claim-kind">研究結果</span><p class="statement">RAVDESS 的人類辨識測試中，僅音訊條件的整體正確率為 60%。這是聽者辨認演員意圖的表現。</p><div class="citation"><a class="source" href="#ref-S03">[S03]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S03">[S03]</a> Discussion, p. 21</p><code>wiki/datasets/datasets-and-evaluation.md#L3</code><blockquote lang="en">In the human validity task, raters identified the intended emotion. Across stimulus types, the authors report 60% correct for audio-only, 75% for video-only, and 80% for audio-video. These are aggregate human identification scores for this study. [S03], Discussion, p. 21.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="假想情境">
+          <h3>假想情境</h3><p class="visual-note">將 IEMOCAP 的一整組會話留作測試，其餘會話用於訓練，想像如何測試未見過的說話者。</p>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-10" aria-labelledby="heading-10">
+      <header class="slide-header">
+        <h2 id="heading-10" tabindex="-1">評估：Accuracy、Precision、Recall 與 F1</h2>
+        <p>先看整體，再追問樣本較少的類別找到了多少。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>用混淆矩陣讀出整體正確率與某類的召回率。</li><li>說明為什麼要同時看各類別表現。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-10.1"><p class="statement">正確率（accuracy）是全部測試樣本中預測正確的比例。精確率（precision）看某類預測中有多少是對的；召回率（recall）看該類實際樣本中有多少被找出。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §5, pp. 9–10, Eqs. (1)–(4)</p><code>wiki/datasets/datasets-and-evaluation.md#L29</code><blockquote lang="en">Accuracy is the share of test examples assigned the correct label. For a given class, precision is the share of predictions of that class that were correct. Recall is the share of actual examples of that class that the system found. The class F1 score is the harmonic mean of precision and recall. When comparing F1 across reports, check how each report combines the classes. [S01], §5, pp. 9–10, Eqs. (1)–(4).</blockquote></details></div></li><li class="claim" id="claim-10.2"><p class="statement">某一類的 F1 是精確率與召回率的調和平均。比較報告時需確認如何彙整各類別的分數。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §5, pp. 9–10, Eqs. (1)–(4)</p><code>wiki/datasets/datasets-and-evaluation.md#L29</code><blockquote lang="en">Accuracy is the share of test examples assigned the correct label. For a given class, precision is the share of predictions of that class that were correct. Recall is the share of actual examples of that class that the system found. The class F1 score is the harmonic mean of precision and recall. When comparing F1 across reports, check how each report combines the classes. [S01], §5, pp. 9–10, Eqs. (1)–(4).</blockquote></details></div></li><li class="claim" id="claim-10.3"><p class="statement">標註資料少或類別分布不均，可能讓模型更難學到可泛化的模式。</p><div class="citation"><a class="source" href="#ref-S06">[S06]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S06">[S06]</a> §1, pp. 110–111</p><code>wiki/datasets/datasets-and-evaluation.md#L21</code><blockquote lang="en">Small or imbalanced labeled datasets can make it harder to learn patterns that generalize. In the review, class imbalance is one of the consequences of limited labeled speech. [S06], §1, pp. 110–111.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="合成資料">
+          <h3>合成資料</h3><table class="matrix"><caption>合成混淆矩陣</caption><thead><tr><th scope="col">實際／預測</th><th scope="col">甲類</th><th scope="col">乙類</th></tr></thead><tbody><tr><th scope="row">甲類</th><td>8</td><td>0</td></tr><tr><th scope="row">乙類</th><td>2</td><td>0</td></tr></tbody></table><details class="exercise"><summary>核對正確率與乙類召回率</summary><p>教學用合成資料。列為實際類別、欄為預測類別。整體正確率為 8/10，乙類召回率為 0/2。</p></details>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-11" aria-labelledby="heading-11">
+      <header class="slide-header">
+        <h2 id="heading-11" tabindex="-1">真實環境中的限制</h2>
+        <p>想像把同一個系統換到不同環境，列出需要重新檢查的條件。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>指出說話者、錄音條件與資料偏差可能帶來的問題。</li><li>說明兒童語音資料蒐集的同意與隱私考量。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-11.1"><span class="claim-kind">綜述建議</span><p class="statement">研究綜述建議跨資料集、說話者與錄音條件測試，也要留意演出與自然語音之間的差異。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §6, pp. 10–11 and §9, p. 16</p><code>wiki/concepts/ser-limitations.md#L9</code><blockquote lang="en">The review recommends testing across datasets, speakers, and recording conditions, with attention to differences between acted and spontaneous speech. It describes generalization of fine-tuned self-supervised representations across domains as an open concern. [S01], §6, pp. 10–11 and §9, p. 16.</blockquote></details></div></li><li class="claim" id="claim-11.2"><p class="statement">加入噪音、改變音高或拉伸時間可產生訓練變體，但這些改動可能保留原本的偏差，或掩蓋情緒線索。</p><div class="citation"><a class="source" href="#ref-S06">[S06]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S06">[S06]</a> §2.2, pp. 113–114, and §3.2, p. 120</p><code>wiki/datasets/datasets-and-evaluation.md#L21</code><blockquote lang="en">Data augmentation creates training variants. The review gives examples such as adding noise, shifting pitch, and stretching time. It warns that modifications can preserve existing biases or obscure cues that matter for the emotion label. [S06], §2.2, pp. 113–114, and §3.2, p. 120.</blockquote></details></div></li><li class="claim" id="claim-11.3"><p class="statement">成人模型轉用到兒童語音時，可能遇到資料領域差異。蒐集兒童語音時，綜述提醒應考量同意與隱私。</p><div class="citation"><a class="source" href="#ref-S07">[S07]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S07">[S07]</a> §8.1, p. 21 and §9, p. 22</p><code>wiki/concepts/ser-limitations.md#L27</code><blockquote lang="en">The adult-and-child review describes smaller, less diverse child-focused datasets in the work it compares, as well as developmental changes in articulation and emotional expression. It identifies adult-to-child transfer as a domain shift and highlights consent and privacy when collecting children’s speech. [S07], §8.1, p. 21 and §9, p. 22.</blockquote></details></div></li><li class="claim" id="claim-11.4"><span class="claim-kind">研究提案</span><p class="statement">S01 作者提出可在頻譜特徵之外加入基頻統計與語速等語調摘要。這是研究提案。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §9, p. 16</p><code>wiki/concepts/ser-limitations.md#L9</code><blockquote lang="en">The author proposes adding explicit intonation summaries, such as F0 statistics and speaking rate, alongside spectral features. This is a research proposal in the review’s conclusion. [S01], §9, p. 16.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="假想情境">
+          <h3>假想情境</h3><p class="visual-note">假想課堂錄音比訓練錄音更吵，且對象換成兒童。列出需要重驗的資料與同意條件。</p>
+        </section>
+      </div>
+    </article>
+    <article class="slide" id="slide-12" aria-labelledby="heading-12">
+      <header class="slide-header">
+        <h2 id="heading-12" tabindex="-1">總結、小測驗與參考資料</h2>
+        <p>先回答問題，再打開證據，核對答案與簡化示意。</p>
+      </header>
+      <div class="slide-grid">
+        <section class="lesson" aria-label="投影片重點">
+          <details class="objectives"><summary>學習目標</summary><ul><li>回顧兩種語音辨識任務與線索的不確定性。</li><li>練習從重點追溯 Wiki 與原始來源編號。</li></ul></details>
+          <ul class="claims"><li class="claim" id="claim-12.1"><p class="statement">語音情緒辨識（Speech Emotion Recognition, SER）利用語音線索估計說話時表現出的情緒。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §1, pp. 1–2 and §4, p. 8</p><code>wiki/concepts/ser-fundamentals.md#L1</code><blockquote lang="en">Speech emotion recognition (SER) uses cues in speech to estimate expressed emotion. Automatic speech recognition (ASR) identifies the sequence of sounds and words spoken. The same recording can be input to either task, with different outputs. [S01], §1, pp. 1–2 and §4, p. 8.</blockquote></details></div></li><li class="claim" id="claim-12.2"><p class="statement">自動語音辨識（Automatic Speech Recognition, ASR）辨識說出的語音與詞語序列。同一段錄音可以用於 SER 和 ASR。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §1, pp. 1–2 and §4, p. 8</p><code>wiki/concepts/ser-fundamentals.md#L1</code><blockquote lang="en">Speech emotion recognition (SER) uses cues in speech to estimate expressed emotion. Automatic speech recognition (ASR) identifies the sequence of sounds and words spoken. The same recording can be input to either task, with different outputs. [S01], §1, pp. 1–2 and §4, p. 8.</blockquote></details></div></li><li class="claim" id="claim-12.3"><p class="statement">音高、訊號強度與說話的時間變化都可能提供線索。高音高可以伴隨不同的高喚起情緒，單靠音高無法判定情緒類別。</p><div class="citation"><a class="source" href="#ref-S01">[S01]</a><details class="evidence"><summary>查看證據</summary><p><a href="#ref-S01">[S01]</a> §§2.2–2.3, pp. 3–4</p><code>wiki/concepts/ser-fundamentals.md#L1</code><blockquote lang="en">The review describes changes in fundamental frequency (F0), signal intensity, and timing as cues that can vary with emotion in complex ways. It discusses higher average F0 in high-arousal speech and gives both anger and happiness as examples. A higher pitch alone therefore gives no unique emotion label. [S01], §§2.2–2.3, pp. 3–4.</blockquote></details></div></li></ul>
+        </section>
+        <section class="visual" aria-label="知識檢核">
+          <h3>知識檢核</h3><div class="quiz"><details><summary>哪一種任務要辨識說出的詞語？</summary><p>自動語音辨識（Automatic Speech Recognition, ASR）辨識說出的語音與詞語序列。同一段錄音可以用於 SER 和 ASR。 <a href="#ref-S01">[S01]</a></p></details><details><summary>為什麼不能只靠較高音高判定情緒？</summary><p>音高、訊號強度與說話的時間變化都可能提供線索。高音高可以伴隨不同的高喚起情緒，單靠音高無法判定情緒類別。 <a href="#ref-S01">[S01]</a></p></details></div><p class="visual-note">選擇一題，先口頭回答，再核對對應的重點與引用。</p>
+        </section>
+      </div><section class="references"><h3>參考資料</h3><ul><li id="ref-S01" tabindex="-1"><a href="https://www.mdpi.com/2076-3417/15/10/5731">[S01] <span lang="en">Review of Automatic Estimation of Emotions in Speech</span></a></li><li id="ref-S02" tabindex="-1"><a href="https://portal.fis.tum.de/en/publications/opensmile-the-munich-versatile-and-fast-open-source-audio-feature/">[S02] <span lang="en">openSMILE: The Munich Versatile and Fast Open-Source Audio Feature Extractor</span></a></li><li id="ref-S03" tabindex="-1"><a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0196391">[S03] <span lang="en">The Ryerson Audio-Visual Database of Emotional Speech and Song (RAVDESS)</span></a></li><li id="ref-S04" tabindex="-1"><a href="https://sail.usc.edu/iemocap/iemocap_release.htm">[S04] <span lang="en">IEMOCAP: Interactive Emotional Dyadic Motion Capture Database</span></a></li><li id="ref-S05" tabindex="-1"><a href="https://proceedings.neurips.cc/paper/2020/hash/92d1e1eb1cd6f9fba3227870bb6d7f07-Abstract.html">[S05] <span lang="en">wav2vec 2.0: A Framework for Self-Supervised Learning of Speech Representations</span></a></li><li id="ref-S06" tabindex="-1"><a href="https://www.sciencedirect.com/science/article/pii/S2405959524001413">[S06] <span lang="en">Addressing Data Scarcity in Speech Emotion Recognition: A Comprehensive Review</span></a></li><li id="ref-S07" tabindex="-1"><a href="https://link.springer.com/article/10.1007/s10772-025-10229-6">[S07] <span lang="en">Speech Emotion Recognition in Adults and Children: A Comprehensive Review of Traditional Features and Raw Waveform Models</span></a></li></ul></section>
+    </article>
+  </main>
+  <nav class="navigation" aria-label="投影片導覽" hidden>
+    <button type="button" id="previous">上一張</button>
+    <div class="progress">
+      <span id="counter" role="status" aria-live="polite" aria-atomic="true">1 / 12</span>
+      <progress id="progress" value="1" max="12" aria-label="簡報進度"></progress>
+    </div>
+    <button type="button" id="next">下一張</button>
+  </nav>
+</body>
+</html>
