@@ -9,7 +9,8 @@ A source-grounded Markdown knowledge base about Speech Emotion Recognition (SER)
 - [x] Repository scaffold and source manifest
 - [x] Discuss and ingest at least five complete source documents (target: seven)
 - [ ] Query and lint the Wiki with logged evidence
-- [ ] Generate, test, and deploy interactive HTML slides
+- [x] Generate and test interactive HTML slides
+- [ ] Deploy the presentation to GitHub Pages
 - [ ] Record a real workflow revision and reflection
 
 **Seven of seven references are verified.** See the [Wiki index](wiki/index.md) for current chapter coverage. Original PDFs should be obtained from their publishers or authors where allowed. Do not commit copies you lack permission to redistribute. Git ignores the `raw/` folder.
@@ -63,11 +64,26 @@ Each invocation appends a JSON record to the local, Git-ignored `logs/answer-run
 
 ## Local preview
 
+Open [the presentation](slides/index.html) in a browser, or serve it locally:
+
 ```bash
 python -m http.server 8000
 # Open http://localhost:8000/slides/
 ```
 
+Use the previous and next buttons, the left and right arrow keys, or the slide menu. Each citation can reveal its Wiki passage, source location, and supporting excerpt. With JavaScript disabled, the twelve slides appear in reading order and the evidence and quiz answers remain expandable.
+
+The published folder contains its own HTML, CSS, and JavaScript. After an approved change to the [slide dataset](data/slide-content.json), run the content checker before rebuilding:
+
+```bash
+python -B scripts/check_slide_content.py
+python -B scripts/build_presentation.py
+python -B scripts/build_presentation.py --check
+node tests/smoke_presentation.mjs "/path/to/chrome"
+```
+
+The browser smoke test requires Node and a local Chromium-family browser. Set `CHROME_BIN` or pass the executable path. See the [validation log](logs/slide-validation.md) for coverage and limitations.
+
 ## Deployment
 
-The included `.github/workflows/deploy-pages.yml` publishes `slides/` from `main` using GitHub Actions. In repository **Settings → Pages**, set **Build and deployment → Source: GitHub Actions**. The current HTML is only a Stage 1 placeholder; a teaching presentation has not been produced or deployed.
+The included `.github/workflows/deploy-pages.yml` publishes `slides/` from `main` using GitHub Actions. In repository **Settings → Pages**, set **Build and deployment → Source: GitHub Actions**. The workflow uploads the self-contained `slides/` folder directly.
