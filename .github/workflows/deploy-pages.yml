@@ -1,4 +1,4 @@
-name: Deploy slides to GitHub Pages
+name: Deploy SER Slides
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: github-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -28,17 +28,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure Pages
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Verify HTML entry point
-        run: test -f slides/index.html
+      - name: Verify presentation files
+        run: |
+          ls -la slides/
+          test -f slides/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./slides
+          name: github-pages
 
-      - name: Deploy GitHub Pages
+      - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
