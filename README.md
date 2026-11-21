@@ -7,12 +7,12 @@ A source-grounded Markdown knowledge base about Speech Emotion Recognition (SER)
 ## Status
 
 - [x] Repository scaffold and source manifest
-- [ ] Discuss and ingest at least five complete source documents (target: seven)
+- [x] Discuss and ingest at least five complete source documents (target: seven)
 - [ ] Query and lint the Wiki with logged evidence
 - [ ] Generate, test, and deploy interactive HTML slides
 - [ ] Record a real workflow revision and reflection
 
-**The seven references are candidates; none are marked ingested yet.** Original PDFs should be obtained from their publishers or authors where allowed. Do not commit copies you lack permission to redistribute; the `raw/` folder is ignored by Git.
+**Seven of seven references are verified.** See the [Wiki index](wiki/index.md) for current chapter coverage. Original PDFs should be obtained from their publishers or authors where allowed. Do not commit copies you lack permission to redistribute. Git ignores the `raw/` folder.
 
 ## Structure
 
