@@ -33,6 +33,34 @@ A source-grounded Markdown knowledge base about Speech Emotion Recognition (SER)
 4. Run `python scripts/check_wiki.py` to inspect ingestion coverage and links.
 5. Generate teaching content from verified Wiki pages only.
 
+## Search the Wiki
+
+```bash
+python scripts/search_wiki.py "spectrogram frequency" --limit 3
+python -m unittest discover -s tests -v
+```
+
+The search command uses standard-library Python and rebuilds its index from Markdown under `wiki/`, including source records. BM25 ranks passages by words in their heading and text. Each result includes a repository-relative path, heading, snippet, score, and any source IDs associated with the snippet or source record. Equal scores are ordered by path and heading position.
+
+Use English keywords or technical terms such as `MFCC` and `wav2vec`. Chinese text is read as Unicode, but the search has no Chinese word segmentation or translation. A Chinese-only query will usually miss the English Wiki. Try the English term or include the English acronym in a mixed query. Scores indicate lexical relevance. Check the returned passage and source citation before relying on it, particularly when only some query terms match.
+
+See the [query validation log](logs/query.md) for examples run against this Wiki.
+
+## Answer questions from the Wiki
+
+```bash
+python scripts/answer_wiki.py "What is MFCC?" --dry-run
+python scripts/answer_wiki.py "What is MFCC?" --model-command python --model-arg path/to/adapter.py
+```
+
+Without an adapter the CLI defaults to dry run. It lists retrieved passage IDs and source IDs and records whether source-linked evidence was found. It skips generation and semantic review. Use `--json` to inspect the full result and retrieved blocks.
+
+The adapter reads one UTF-8 JSON object on stdin and writes one JSON object to stdout per call. Route by `phase` (`sufficiency`, `generate`, or `validate`). Pass the supplied instructions and fields to your model, using the `passages` as its factual context. Each phase's instructions define the required JSON response. Repeat `--model-arg` for extra executable arguments. By default the same adapter handles generation and review. To configure a separate reviewer, pass `--review-command` and repeat `--review-arg` as needed.
+
+Deterministic validation checks that every claim has a retrieved passage ID and a source ID present in that passage. Semantic review evaluates whether the cited words support the claim and whether the answer addresses the question. A review pass is a model judgment. The workflow allows one initial generation and up to two corrections. Unresolved validation failures and adapter errors exit with status 1.
+
+Each invocation appends a JSON record to the local, Git-ignored `logs/answer-runs.log`. It includes the question, passage IDs, actual check outcomes, retries and any accepted claims. Use `--log` to choose the destination. A configured adapter receives the question and retrieved Wiki text.
+
 ## Local preview
 
 ```bash
