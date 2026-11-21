@@ -1,0 +1,89 @@
+[
+  {
+    "id": "S01",
+    "title": "Review of Automatic Estimation of Emotions in Speech",
+    "url": "https://www.mdpi.com/2076-3417/15/10/5731",
+    "chapters": [
+      1,
+      3,
+      4,
+      6
+    ],
+    "status": "planned",
+    "local_file": null,
+    "verified_on": null
+  },
+  {
+    "id": "S02",
+    "title": "openSMILE: The Munich Versatile and Fast Open-Source Audio Feature Extractor",
+    "url": "https://portal.fis.tum.de/en/publications/opensmile-the-munich-versatile-and-fast-open-source-audio-feature/",
+    "chapters": [
+      2,
+      4
+    ],
+    "status": "planned",
+    "local_file": null,
+    "verified_on": null
+  },
+  {
+    "id": "S03",
+    "title": "The Ryerson Audio-Visual Database of Emotional Speech and Song (RAVDESS)",
+    "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0196391",
+    "chapters": [
+      3,
+      5
+    ],
+    "status": "planned",
+    "local_file": null,
+    "verified_on": null
+  },
+  {
+    "id": "S04",
+    "title": "IEMOCAP: Interactive Emotional Dyadic Motion Capture Database",
+    "url": "https://sail.usc.edu/iemocap/iemocap_release.htm",
+    "chapters": [
+      3,
+      5,
+      6
+    ],
+    "status": "planned",
+    "local_file": null,
+    "verified_on": null
+  },
+  {
+    "id": "S05",
+    "title": "wav2vec 2.0: A Framework for Self-Supervised Learning of Speech Representations",
+    "url": "https://proceedings.neurips.cc/paper/2020/hash/92d1e1eb1cd6f9fba3227870bb6d7f07-Abstract.html",
+    "chapters": [
+      4
+    ],
+    "status": "planned",
+    "local_file": null,
+    "verified_on": null
+  },
+  {
+    "id": "S06",
+    "title": "Addressing Data Scarcity in Speech Emotion Recognition: A Comprehensive Review",
+    "url": "https://www.sciencedirect.com/science/article/pii/S2405959524001413",
+    "chapters": [
+      5,
+      6
+    ],
+    "status": "planned",
+    "local_file": null,
+    "verified_on": null
+  },
+  {
+    "id": "S07",
+    "title": "Speech Emotion Recognition in Adults and Children: A Comprehensive Review of Traditional Features and Raw Waveform Models",
+    "url": "https://link.springer.com/article/10.1007/s10772-025-10229-6",
+    "chapters": [
+      2,
+      4,
+      6
+    ],
+    "status": "planned",
+    "local_file": null,
+    "verified_on": null
+  }
+]
