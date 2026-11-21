@@ -1,0 +1,987 @@
+{
+  "title": "AI 如何聽出情緒？從聲音特徵到深度學習的語音情緒辨識入門",
+  "language": "zh-Hant",
+  "audience": "沒有語音情緒辨識背景的初學者",
+  "review_method": "manual_wiki_claim_review",
+  "slides": [
+    {
+      "number": 1,
+      "title": "課程導覽",
+      "learning_objectives": [
+        "用自己的話說明語音情緒辨識在做什麼。",
+        "預覽從聲音到模型評估的學習路線。"
+      ],
+      "explanation": "從一段錄音出發，依序認識聲音特徵、情緒標註、模型與評估。",
+      "key_points": [
+        {
+          "id": "01.1",
+          "text": "語音情緒辨識（Speech Emotion Recognition, SER）利用語音線索估計說話時表現出的情緒。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/ser-fundamentals.md",
+              "passage_id": "wiki/concepts/ser-fundamentals.md#L1",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§1, pp. 1–2 and §4, p. 8",
+              "excerpt": "Speech emotion recognition (SER) uses cues in speech to estimate expressed emotion. Automatic speech recognition (ASR) identifies the sequence of sounds and words spoken. The same recording can be input to either task, with different outputs. [S01], §1, pp. 1–2 and §4, p. 8."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "diagram",
+        "description": "四站式路線圖：音訊 → 表示 → 模型 → 評估。"
+      },
+      "retrieval": [
+        {
+          "query": "speech emotion recognition SER expressed emotion learning goals",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/concepts/ser-fundamentals.md#L1",
+            "wiki/index.md#L3",
+            "wiki/sources/S05.md#L8",
+            "wiki/models/ser-models.md#L7",
+            "wiki/sources/S01.md#L12",
+            "wiki/sources/S06.md#L1",
+            "wiki/sources/S05.md#L12",
+            "wiki/sources/S07.md#L1",
+            "wiki/sources/S05.md#L1",
+            "wiki/concepts/ser-limitations.md#L3"
+          ]
+        }
+      ],
+      "correction_retries": 0
+    },
+    {
+      "number": 2,
+      "title": "同一句話，兩種辨識任務",
+      "learning_objectives": [
+        "區分 SER 與 ASR 的輸出。",
+        "說明聲音線索為何需要合併解讀。"
+      ],
+      "explanation": "先問「說了什麼」，再問「這段聲音聽起來如何」。",
+      "key_points": [
+        {
+          "id": "02.1",
+          "text": "自動語音辨識（Automatic Speech Recognition, ASR）辨識說出的語音與詞語序列。同一段錄音可以用於 SER 和 ASR。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/ser-fundamentals.md",
+              "passage_id": "wiki/concepts/ser-fundamentals.md#L1",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§1, pp. 1–2 and §4, p. 8",
+              "excerpt": "Speech emotion recognition (SER) uses cues in speech to estimate expressed emotion. Automatic speech recognition (ASR) identifies the sequence of sounds and words spoken. The same recording can be input to either task, with different outputs. [S01], §1, pp. 1–2 and §4, p. 8."
+            }
+          ]
+        },
+        {
+          "id": "02.2",
+          "text": "音高、訊號強度與說話的時間變化都可能提供線索。高音高可以伴隨不同的高喚起情緒，單靠音高無法判定情緒類別。",
+          "kind": "review_synthesis",
+          "evidence": [
+            {
+              "path": "wiki/concepts/ser-fundamentals.md",
+              "passage_id": "wiki/concepts/ser-fundamentals.md#L1",
+              "block": 2,
+              "source_id": "S01",
+              "location": "§§2.2–2.3, pp. 3–4",
+              "excerpt": "The review describes changes in fundamental frequency (F0), signal intensity, and timing as cues that can vary with emotion in complex ways. It discusses higher average F0 in high-arousal speech and gives both anger and happiness as examples. A higher pitch alone therefore gives no unique emotion label. [S01], §§2.2–2.3, pp. 3–4."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "teaching_example",
+        "description": "想像同一句「我知道了」用兩種語氣說出來。請先寫下相同的文字，再圈出你想比較的聲音線索。"
+      },
+      "retrieval": [
+        {
+          "query": "speech emotion recognition ASR same phrase timing high pitch anger happiness",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/concepts/ser-fundamentals.md#L1",
+            "wiki/sources/S01.md#L12",
+            "wiki/concepts/emotion-representations.md#L1",
+            "wiki/index.md#L3",
+            "wiki/sources/S06.md#L1",
+            "wiki/models/ser-models.md#L7",
+            "wiki/sources/S07.md#L1",
+            "wiki/datasets/datasets-and-evaluation.md#L3",
+            "wiki/sources/S05.md#L8",
+            "wiki/sources/S02.md#L8"
+          ]
+        }
+      ],
+      "correction_retries": 0
+    },
+    {
+      "number": 3,
+      "title": "波形與取樣",
+      "learning_objectives": [
+        "說明波形、取樣率和音框的關係。"
+      ],
+      "explanation": "從整段聲音縮小到一小段，看看電腦如何整理輸入。",
+      "key_points": [
+        {
+          "id": "03.1",
+          "text": "數位波形是一串音訊樣本。取樣率是每秒的樣本數。音框（frame）把相鄰的樣本分成一小段供分析。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/acoustic-features.md",
+              "passage_id": "wiki/concepts/acoustic-features.md#L3",
+              "block": 1,
+              "source_id": "S02",
+              "location": "§§3 and 5, pp. 1460–1462",
+              "excerpt": "A digital waveform is a sequence of audio samples. A frame groups adjacent samples for analysis. The sampling rate gives the number of samples per second. The paper illustrates how the toolkit groups samples into frames for pitch estimation. [S02], §§3 and 5, pp. 1460–1462."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "diagram",
+        "description": "用時間軸上的點表示樣本，再用方框圈出一組相鄰的點。圖為示意。"
+      },
+      "retrieval": [
+        {
+          "query": "digital waveform audio samples sampling rate frames",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/concepts/acoustic-features.md#L3",
+            "wiki/models/ser-models.md#L29",
+            "wiki/sources/S02.md#L12",
+            "wiki/sources/S07.md#L12",
+            "wiki/sources/S01.md#L8",
+            "wiki/concepts/acoustic-features.md#L9",
+            "wiki/sources/S07.md#L1",
+            "wiki/concepts/ser-limitations.md#L9",
+            "wiki/datasets/datasets-and-evaluation.md#L3",
+            "wiki/sources/S01.md#L25"
+          ]
+        }
+      ],
+      "correction_retries": 0
+    },
+    {
+      "number": 4,
+      "title": "音高、能量、時間與 MFCC",
+      "learning_objectives": [
+        "分辨常見的聲學特徵。",
+        "比較梅爾頻譜圖與 MFCC 所呈現的資訊。"
+      ],
+      "explanation": "對照同一段音訊的不同表示，辨認每種表示保留哪些資訊。",
+      "key_points": [
+        {
+          "id": "04.1",
+          "text": "基頻（F0）與感知到的音高有關。均方根能量概括音框內的訊號幅度。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/acoustic-features.md",
+              "passage_id": "wiki/concepts/acoustic-features.md#L3",
+              "block": 2,
+              "source_id": "S02",
+              "location": "§4, pp. 1460–1461, Table 1",
+              "excerpt": "Examples of frame descriptors include fundamental frequency (F0), which relates to perceived pitch, and root-mean-square energy, which summarizes signal magnitude over a frame. The toolkit also computes mel-frequency cepstral coefficients (MFCCs). [S02], §4, pp. 1460–1461, Table 1."
+            }
+          ]
+        },
+        {
+          "id": "04.2",
+          "text": "說話的時間變化也是情緒線索之一。",
+          "kind": "review_synthesis",
+          "evidence": [
+            {
+              "path": "wiki/concepts/ser-fundamentals.md",
+              "passage_id": "wiki/concepts/ser-fundamentals.md#L1",
+              "block": 2,
+              "source_id": "S01",
+              "location": "§§2.2–2.3, pp. 3–4",
+              "excerpt": "The review describes changes in fundamental frequency (F0), signal intensity, and timing as cues that can vary with emotion in complex ways. It discusses higher average F0 in high-arousal speech and gives both anger and happiness as examples. A higher pitch alone therefore gives no unique emotion label. [S01], §§2.2–2.3, pp. 3–4."
+            }
+          ]
+        },
+        {
+          "id": "04.3",
+          "text": "梅爾頻譜圖（mel spectrogram）呈現各梅爾頻帶的訊號強度如何隨時間變化。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/acoustic-features.md",
+              "passage_id": "wiki/concepts/acoustic-features.md#L13",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§§3.2–3.4, pp. 6–7",
+              "excerpt": "A spectrogram shows how the distribution of signal strength across frequencies changes over time. Each short frame contributes a spectrum. A mel-spectrogram groups frequencies into bands on the mel scale. [S01], §§3.2–3.4, pp. 6–7."
+            }
+          ]
+        },
+        {
+          "id": "04.4",
+          "text": "梅爾頻率倒譜係數（MFCCs）是對單一音框的梅爾頻譜進行轉換後得到的精簡表示。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/acoustic-features.md",
+              "passage_id": "wiki/concepts/acoustic-features.md#L13",
+              "block": 2,
+              "source_id": "S07",
+              "location": "§§2.1–2.2, pp. 5–6",
+              "excerpt": "MFCCs give a compact, transformed summary of a frame’s mel spectrum. Another feature, spectral spread, describes how widely frequencies are distributed. [S07], §§2.1–2.2, pp. 5–6."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "diagram",
+        "description": "把示意波形與梅爾頻譜圖並排，再畫一個小向量代表某個音框的 MFCC。"
+      },
+      "retrieval": [
+        {
+          "query": "pitch F0 root mean square energy timing MFCC mel spectrum",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/concepts/acoustic-features.md#L3",
+            "wiki/concepts/acoustic-features.md#L13",
+            "wiki/sources/S02.md#L12",
+            "wiki/concepts/ser-fundamentals.md#L1",
+            "wiki/concepts/acoustic-features.md#L9",
+            "wiki/sources/S07.md#L12",
+            "wiki/sources/S01.md#L25",
+            "wiki/sources/S02.md#L8",
+            "wiki/sources/S01.md#L12",
+            "wiki/datasets/datasets-and-evaluation.md#L29"
+          ]
+        }
+      ],
+      "correction_retries": 0
+    },
+    {
+      "number": 5,
+      "title": "用類別或尺度表示情緒",
+      "learning_objectives": [
+        "區分類別式與維度式標註。",
+        "用愉悅度與喚起度描述假想聲音。"
+      ],
+      "explanation": "試著用一個名稱與兩個尺度描述同一段聲音。",
+      "key_points": [
+        {
+          "id": "05.1",
+          "text": "類別式表示使用命名的標籤，例如生氣、喜悅或悲傷。資料集也可以設有中性類別。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/emotion-representations.md",
+              "passage_id": "wiki/concepts/emotion-representations.md#L1",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§2, pp. 2–3",
+              "excerpt": "- Categorical outputs use named labels, such as anger, joy, or sadness. A dataset can also define a neutral class. [S01], §2, pp. 2–3. - Dimensional outputs use ratings on scales. Valence describes pleasantness, and arousal describes activation or intensity. Some representations add dominance, a dimension related to control. [S01], §2.1, p. 3."
+            }
+          ]
+        },
+        {
+          "id": "05.2",
+          "text": "維度式表示使用尺度評分。愉悅度（valence）描述愉悅程度，喚起度（arousal）描述活化或強烈程度。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/emotion-representations.md",
+              "passage_id": "wiki/concepts/emotion-representations.md#L1",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§2.1, p. 3",
+              "excerpt": "- Categorical outputs use named labels, such as anger, joy, or sadness. A dataset can also define a neutral class. [S01], §2, pp. 2–3. - Dimensional outputs use ratings on scales. Valence describes pleasantness, and arousal describes activation or intensity. Some representations add dominance, a dimension related to control. [S01], §2.1, p. 3."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "teaching_example",
+        "description": "在雙軸圖上放兩個假想點：兩個點的喚起度都高，一個較愉悅、另一個較不愉悅。"
+      },
+      "retrieval": [
+        {
+          "query": "categorical dimensional valence arousal pleasantness labels",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/concepts/emotion-representations.md#L1",
+            "wiki/sources/S01.md#L25",
+            "wiki/sources/S01.md#L12",
+            "wiki/sources/S04.md#L12",
+            "wiki/concepts/emotion-representations.md#L18",
+            "wiki/concepts/emotion-representations.md#L12",
+            "wiki/sources/S03.md#L12",
+            "wiki/concepts/ser-fundamentals.md#L1",
+            "wiki/concepts/ser-limitations.md#L17",
+            "wiki/concepts/ser-limitations.md#L3"
+          ]
+        }
+      ],
+      "correction_retries": 0
+    },
+    {
+      "number": 6,
+      "title": "傳統方法：先抽特徵，再分類",
+      "learning_objectives": [
+        "依序說出特徵擷取、摘要與分類。",
+        "辨認 openSMILE 與 SVM 的角色。"
+      ],
+      "explanation": "跟著一段錄音走完特徵擷取到情緒預測的流程。",
+      "key_points": [
+        {
+          "id": "06.1",
+          "text": "傳統流程先把語音轉成數值特徵，再由分類器判斷類別。支援向量機（SVM）可學習區隔情緒類別的邊界。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/models/ser-models.md",
+              "passage_id": "wiki/models/ser-models.md#L3",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§4 and §4.3, p. 8",
+              "excerpt": "In the traditional pipeline described by the review, a front end turns speech into numerical features and a back end classifies the resulting representation. A support vector machine (SVM), for example, can learn a boundary between examples of one emotion class and the remaining classes. [S01], §4 and §4.3, p. 8."
+            }
+          ]
+        },
+        {
+          "id": "06.2",
+          "text": "openSMILE 可以計算音框特徵與摘要，再輸出特徵或傳給後續元件。",
+          "kind": "research_method",
+          "evidence": [
+            {
+              "path": "wiki/models/ser-models.md",
+              "passage_id": "wiki/models/ser-models.md#L15",
+              "block": 1,
+              "source_id": "S02",
+              "location": "§§3–5, pp. 1460–1462",
+              "excerpt": "openSMILE uses configurable components to read audio, compute frame-level descriptors and summaries, and export features or pass data to a downstream component. The paper’s benchmark times feature extraction itself. [S02], §§3–5, pp. 1460–1462."
+            }
+          ]
+        },
+        {
+          "id": "06.3",
+          "text": "統計摘要可以把一連串音高量測整理成平均值、最小值或最大值。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/acoustic-features.md",
+              "passage_id": "wiki/concepts/acoustic-features.md#L9",
+              "block": 1,
+              "source_id": "S02",
+              "location": "§§2–4, pp. 1460–1461, Fig. 1 and Table 2",
+              "excerpt": "A functional turns a sequence of measurements into a summary, such as a mean, minimum, or maximum. In the toolkit’s example, a pitch descriptor is computed on frames and then summarized across frames. [S02], §§2–4, pp. 1460–1461, Fig. 1 and Table 2."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "diagram",
+        "description": "畫出「錄音 → 音框特徵 → 統計摘要 → SVM → 預測標籤」的示意流程。"
+      },
+      "retrieval": [
+        {
+          "query": "traditional pipeline acoustic features SVM openSMILE pitch functional summaries",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/sources/S02.md#L12",
+            "wiki/models/ser-models.md#L3",
+            "wiki/models/ser-models.md#L15",
+            "wiki/concepts/acoustic-features.md#L9",
+            "wiki/concepts/ser-limitations.md#L9",
+            "wiki/sources/S01.md#L12",
+            "wiki/sources/S07.md#L1",
+            "wiki/index.md#L6",
+            "wiki/sources/S02.md#L1",
+            "wiki/sources/S02.md#L8"
+          ]
+        }
+      ],
+      "correction_retries": 0
+    },
+    {
+      "number": 7,
+      "title": "深度學習：從輸入學特徵",
+      "learning_objectives": [
+        "用自己的話比較 CNN 與 LSTM。",
+        "辨認波形模型與人工特徵流程的輸入差異。"
+      ],
+      "explanation": "用局部觀察與沿時間保留資訊這兩個角度理解模型。",
+      "key_points": [
+        {
+          "id": "07.1",
+          "text": "波形模型可接收音訊樣本，由前面的網路層學習表示。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/models/ser-models.md",
+              "passage_id": "wiki/models/ser-models.md#L29",
+              "block": 1,
+              "source_id": "S07",
+              "location": "§§2–3, pp. 5–7 and §9, p. 22",
+              "excerpt": "A waveform model takes audio samples as input and learns its own representation in its early layers. Gudivaka and colleagues propose combining learned waveform representations with structured features for children’s speech, where labeled data are scarce. [S07], §§2–3, pp. 5–7 and §9, p. 22."
+            }
+          ]
+        },
+        {
+          "id": "07.2",
+          "text": "卷積神經網路（CNN）用小型濾波器偵測局部模式。長短期記憶網路（LSTM）用記憶狀態和閘門在序列中傳遞資訊。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/models/ser-models.md",
+              "passage_id": "wiki/models/ser-models.md#L29",
+              "block": 2,
+              "source_id": "S07",
+              "location": "§§5.1 and 5.2.1, pp. 10–11",
+              "excerpt": "A convolutional neural network (CNN) uses small filters to detect local patterns in inputs such as a waveform or spectrogram. A long short-term memory network (LSTM) uses a memory state and gates to pass information along a sequence. [S07], §§5.1 and 5.2.1, pp. 10–11."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "diagram",
+        "description": "用移動的小方框比喻 CNN 的局部觀察，用一列依序傳遞的方框示意 LSTM。"
+      },
+      "retrieval": [
+        {
+          "query": "CNN LSTM waveform raw audio neural networks local patterns memory gates",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/models/ser-models.md#L29",
+            "wiki/sources/S07.md#L12",
+            "wiki/sources/S07.md#L1",
+            "wiki/sources/S05.md#L1",
+            "wiki/sources/S03.md#L1",
+            "wiki/sources/S02.md#L1",
+            "wiki/sources/S01.md#L1",
+            "wiki/concepts/acoustic-features.md#L3",
+            "wiki/sources/S06.md#L1",
+            "wiki/sources/S02.md#L12"
+          ]
+        }
+      ],
+      "correction_retries": 0
+    },
+    {
+      "number": 8,
+      "title": "wav2vec 2.0：先預訓練，再適配任務",
+      "learning_objectives": [
+        "說明遮蔽訓練的基本想法。",
+        "分辨原始 ASR 研究與下游 SER 用法。"
+      ],
+      "explanation": "把模型學習語音表示的階段，和之後使用表示的任務分開看。",
+      "key_points": [
+        {
+          "id": "08.1",
+          "text": "原始 wav2vec 2.0 先用卷積編碼器和 Transformer 建立含上下文的語音表示。預訓練會遮住部分編碼輸出，讓模型從候選項辨認正確的離散表示。",
+          "kind": "research_method",
+          "evidence": [
+            {
+              "path": "wiki/models/ser-models.md",
+              "passage_id": "wiki/models/ser-models.md#L21",
+              "block": 1,
+              "source_id": "S05",
+              "location": "§2, Fig. 1 and §§3.1–3.2, pp. 2–3",
+              "excerpt": "A convolutional encoder turns raw audio into short-time representations, and a Transformer builds representations using sequence context. During pretraining, some encoder outputs are masked and the model learns to select the matching discrete representation from distractors. [S05], §2, Fig. 1 and §§3.1–3.2, pp. 2–3."
+            }
+          ]
+        },
+        {
+          "id": "08.2",
+          "text": "原始研究以有文字標註的語音微調模型，目標是語音轉寫（ASR）。",
+          "kind": "research_method",
+          "evidence": [
+            {
+              "path": "wiki/models/ser-models.md",
+              "passage_id": "wiki/models/ser-models.md#L21",
+              "block": 2,
+              "source_id": "S05",
+              "location": "§3.3, p. 4",
+              "excerpt": "The authors fine-tuned for transcription on labeled speech using connectionist temporal classification (CTC). [S05], §3.3, p. 4."
+            }
+          ]
+        },
+        {
+          "id": "08.3",
+          "text": "Wiki 介紹的下游 SER 例子會用池化（pooling）把各音框的表示合成整段表示，再預測情緒標籤。",
+          "kind": "research_method",
+          "evidence": [
+            {
+              "path": "wiki/models/ser-models.md",
+              "passage_id": "wiki/models/ser-models.md#L7",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§7.3, pp. 14–15",
+              "excerpt": "The review describes learning general speech representations from unlabeled audio through self-supervised pretraining and then adapting the model to labeled SER examples. In one wav2vec 2.0 downstream example, pooling combines the encoder’s frame-level outputs into a representation of the whole clip, which a classifier uses to predict an emotion label. [S01], §7.3, pp. 14–15."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "diagram",
+        "description": "兩條支線：預訓練編碼器 → 語音轉寫；預訓練編碼器 → 池化與分類 → 情緒標籤。"
+      },
+      "retrieval": [
+        {
+          "query": "wav2vec 2.0 masked latent contrastive targets CTC transcription downstream SER pooling",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/models/ser-models.md#L21",
+            "wiki/models/ser-models.md#L7",
+            "wiki/sources/S05.md#L12",
+            "wiki/sources/S05.md#L1",
+            "wiki/sources/S01.md#L12",
+            "wiki/concepts/ser-fundamentals.md#L1",
+            "wiki/sources/S07.md#L12",
+            "wiki/index.md#L6",
+            "wiki/models/ser-models.md#L15",
+            "wiki/sources/S06.md#L12"
+          ]
+        }
+      ],
+      "correction_retries": 0
+    },
+    {
+      "number": 9,
+      "title": "RAVDESS 與 IEMOCAP",
+      "learning_objectives": [
+        "比較兩個資料集如何產生語音。",
+        "說明為什麼要留出整組說話者做測試。"
+      ],
+      "explanation": "先比較錄音怎麼來，再想一想資料怎麼分。",
+      "key_points": [
+        {
+          "id": "09.1",
+          "text": "RAVDESS 的演員以固定句子錄製說話及歌唱，提供影音、僅影像與僅音訊三種版本。",
+          "kind": "research_method",
+          "evidence": [
+            {
+              "path": "wiki/datasets/datasets-and-evaluation.md",
+              "passage_id": "wiki/datasets/datasets-and-evaluation.md#L3",
+              "block": 1,
+              "source_id": "S03",
+              "location": "Description of RAVDESS files, p. 11 and Table 1",
+              "excerpt": "Twenty-four actors performed two fixed statements in a controlled speech-and-song dataset. The same performance was exported in audio-video, video-only, and audio-only forms. [S03], Description of RAVDESS files, p. 11 and Table 1."
+            }
+          ]
+        },
+        {
+          "id": "09.2",
+          "text": "IEMOCAP 由演員兩兩錄音，包含照稿對話，也包含依情境提示即興的對話。",
+          "kind": "research_method",
+          "evidence": [
+            {
+              "path": "wiki/datasets/datasets-and-evaluation.md",
+              "passage_id": "wiki/datasets/datasets-and-evaluation.md#L15",
+              "block": 1,
+              "source_id": "S04",
+              "location": "§§3.1–3.2, manuscript pp. 6–8",
+              "excerpt": "Ten actors were recorded in five paired sessions. The design included scripted dialogue and improvisation prompted by hypothetical scenarios. [S04], §§3.1–3.2, manuscript pp. 6–8."
+            }
+          ]
+        },
+        {
+          "id": "09.3",
+          "text": "RAVDESS 的人類辨識測試中，僅音訊條件的整體正確率為 60%。這是聽者辨認演員意圖的表現。",
+          "kind": "research_finding",
+          "evidence": [
+            {
+              "path": "wiki/datasets/datasets-and-evaluation.md",
+              "passage_id": "wiki/datasets/datasets-and-evaluation.md#L3",
+              "block": 3,
+              "source_id": "S03",
+              "location": "Discussion, p. 21",
+              "excerpt": "In the human validity task, raters identified the intended emotion. Across stimulus types, the authors report 60% correct for audio-only, 75% for video-only, and 80% for audio-video. These are aggregate human identification scores for this study. [S03], Discussion, p. 21."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "teaching_example",
+        "description": "將 IEMOCAP 的一整組會話留作測試，其餘會話用於訓練，想像如何測試未見過的說話者。"
+      },
+      "retrieval": [
+        {
+          "query": "RAVDESS IEMOCAP paired sessions fixed statements dataset design",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/datasets/datasets-and-evaluation.md#L15",
+            "wiki/datasets/datasets-and-evaluation.md#L3",
+            "wiki/sources/S03.md#L12",
+            "wiki/concepts/emotion-representations.md#L12",
+            "wiki/sources/S01.md#L8",
+            "wiki/concepts/emotion-representations.md#L18",
+            "wiki/sources/S03.md#L1",
+            "wiki/concepts/ser-limitations.md#L3",
+            "wiki/sources/S04.md#L1",
+            "wiki/concepts/ser-limitations.md#L17"
+          ]
+        }
+      ],
+      "correction_retries": 0
+    },
+    {
+      "number": 10,
+      "title": "評估：Accuracy、Precision、Recall 與 F1",
+      "learning_objectives": [
+        "用混淆矩陣讀出整體正確率與某類的召回率。",
+        "說明為什麼要同時看各類別表現。"
+      ],
+      "explanation": "先看整體，再追問樣本較少的類別找到了多少。",
+      "key_points": [
+        {
+          "id": "10.1",
+          "text": "正確率（accuracy）是全部測試樣本中預測正確的比例。精確率（precision）看某類預測中有多少是對的；召回率（recall）看該類實際樣本中有多少被找出。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/datasets/datasets-and-evaluation.md",
+              "passage_id": "wiki/datasets/datasets-and-evaluation.md#L29",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§5, pp. 9–10, Eqs. (1)–(4)",
+              "excerpt": "Accuracy is the share of test examples assigned the correct label. For a given class, precision is the share of predictions of that class that were correct. Recall is the share of actual examples of that class that the system found. The class F1 score is the harmonic mean of precision and recall. When comparing F1 across reports, check how each report combines the classes. [S01], §5, pp. 9–10, Eqs. (1)–(4)."
+            }
+          ]
+        },
+        {
+          "id": "10.2",
+          "text": "某一類的 F1 是精確率與召回率的調和平均。比較報告時需確認如何彙整各類別的分數。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/datasets/datasets-and-evaluation.md",
+              "passage_id": "wiki/datasets/datasets-and-evaluation.md#L29",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§5, pp. 9–10, Eqs. (1)–(4)",
+              "excerpt": "Accuracy is the share of test examples assigned the correct label. For a given class, precision is the share of predictions of that class that were correct. Recall is the share of actual examples of that class that the system found. The class F1 score is the harmonic mean of precision and recall. When comparing F1 across reports, check how each report combines the classes. [S01], §5, pp. 9–10, Eqs. (1)–(4)."
+            }
+          ]
+        },
+        {
+          "id": "10.3",
+          "text": "標註資料少或類別分布不均，可能讓模型更難學到可泛化的模式。",
+          "kind": "review_synthesis",
+          "evidence": [
+            {
+              "path": "wiki/datasets/datasets-and-evaluation.md",
+              "passage_id": "wiki/datasets/datasets-and-evaluation.md#L21",
+              "block": 1,
+              "source_id": "S06",
+              "location": "§1, pp. 110–111",
+              "excerpt": "Small or imbalanced labeled datasets can make it harder to learn patterns that generalize. In the review, class imbalance is one of the consequences of limited labeled speech. [S06], §1, pp. 110–111."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "synthetic_data",
+        "description": "教學用合成資料。列為實際類別、欄為預測類別。整體正確率為 8/10，乙類召回率為 0/2。",
+        "data": {
+          "labels": [
+            "甲類",
+            "乙類"
+          ],
+          "counts": [
+            [
+              8,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ],
+          "accuracy": {
+            "numerator": 8,
+            "denominator": 10
+          },
+          "recall": {
+            "label": "乙類",
+            "numerator": 0,
+            "denominator": 2
+          }
+        }
+      },
+      "retrieval": [
+        {
+          "query": "exact formula unweighted average recall UAR accuracy precision recall F1 class imbalance",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/datasets/datasets-and-evaluation.md#L29",
+            "wiki/sources/S01.md#L25",
+            "wiki/datasets/datasets-and-evaluation.md#L21",
+            "wiki/sources/S06.md#L12",
+            "wiki/models/ser-models.md#L3",
+            "wiki/concepts/ser-fundamentals.md#L1",
+            "wiki/sources/S03.md#L12",
+            "wiki/concepts/emotion-representations.md#L1",
+            "wiki/sources/S01.md#L12"
+          ]
+        },
+        {
+          "query": "accuracy precision recall class F1 classification scores class imbalance",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/datasets/datasets-and-evaluation.md#L29",
+            "wiki/sources/S01.md#L25",
+            "wiki/datasets/datasets-and-evaluation.md#L21",
+            "wiki/sources/S03.md#L8",
+            "wiki/models/ser-models.md#L3",
+            "wiki/models/ser-models.md#L21",
+            "wiki/datasets/datasets-and-evaluation.md#L3",
+            "wiki/sources/S03.md#L12",
+            "wiki/sources/S06.md#L12",
+            "wiki/concepts/emotion-representations.md#L1"
+          ]
+        }
+      ],
+      "correction_retries": 1
+    },
+    {
+      "number": 11,
+      "title": "真實環境中的限制",
+      "learning_objectives": [
+        "指出說話者、錄音條件與資料偏差可能帶來的問題。",
+        "說明兒童語音資料蒐集的同意與隱私考量。"
+      ],
+      "explanation": "想像把同一個系統換到不同環境，列出需要重新檢查的條件。",
+      "key_points": [
+        {
+          "id": "11.1",
+          "text": "研究綜述建議跨資料集、說話者與錄音條件測試，也要留意演出與自然語音之間的差異。",
+          "kind": "review_recommendation",
+          "evidence": [
+            {
+              "path": "wiki/concepts/ser-limitations.md",
+              "passage_id": "wiki/concepts/ser-limitations.md#L9",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§6, pp. 10–11 and §9, p. 16",
+              "excerpt": "The review recommends testing across datasets, speakers, and recording conditions, with attention to differences between acted and spontaneous speech. It describes generalization of fine-tuned self-supervised representations across domains as an open concern. [S01], §6, pp. 10–11 and §9, p. 16."
+            }
+          ]
+        },
+        {
+          "id": "11.2",
+          "text": "加入噪音、改變音高或拉伸時間可產生訓練變體，但這些改動可能保留原本的偏差，或掩蓋情緒線索。",
+          "kind": "review_synthesis",
+          "evidence": [
+            {
+              "path": "wiki/datasets/datasets-and-evaluation.md",
+              "passage_id": "wiki/datasets/datasets-and-evaluation.md#L21",
+              "block": 2,
+              "source_id": "S06",
+              "location": "§2.2, pp. 113–114, and §3.2, p. 120",
+              "excerpt": "Data augmentation creates training variants. The review gives examples such as adding noise, shifting pitch, and stretching time. It warns that modifications can preserve existing biases or obscure cues that matter for the emotion label. [S06], §2.2, pp. 113–114, and §3.2, p. 120."
+            }
+          ]
+        },
+        {
+          "id": "11.3",
+          "text": "成人模型轉用到兒童語音時，可能遇到資料領域差異。蒐集兒童語音時，綜述提醒應考量同意與隱私。",
+          "kind": "review_synthesis",
+          "evidence": [
+            {
+              "path": "wiki/concepts/ser-limitations.md",
+              "passage_id": "wiki/concepts/ser-limitations.md#L27",
+              "block": 1,
+              "source_id": "S07",
+              "location": "§8.1, p. 21 and §9, p. 22",
+              "excerpt": "The adult-and-child review describes smaller, less diverse child-focused datasets in the work it compares, as well as developmental changes in articulation and emotional expression. It identifies adult-to-child transfer as a domain shift and highlights consent and privacy when collecting children’s speech. [S07], §8.1, p. 21 and §9, p. 22."
+            }
+          ]
+        },
+        {
+          "id": "11.4",
+          "text": "S01 作者提出可在頻譜特徵之外加入基頻統計與語速等語調摘要。這是研究提案。",
+          "kind": "research_proposal",
+          "evidence": [
+            {
+              "path": "wiki/concepts/ser-limitations.md",
+              "passage_id": "wiki/concepts/ser-limitations.md#L9",
+              "block": 2,
+              "source_id": "S01",
+              "location": "§9, p. 16",
+              "excerpt": "The author proposes adding explicit intonation summaries, such as F0 statistics and speaking rate, alongside spectral features. This is a research proposal in the review’s conclusion. [S01], §9, p. 16."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "teaching_example",
+        "description": "假想課堂錄音比訓練錄音更吵，且對象換成兒童。列出需要重驗的資料與同意條件。"
+      },
+      "retrieval": [
+        {
+          "query": "held out speakers recording conditions noise augmentation bias negative transfer consent privacy children",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/concepts/ser-limitations.md#L21",
+            "wiki/concepts/ser-limitations.md#L27",
+            "wiki/sources/S06.md#L12",
+            "wiki/concepts/ser-limitations.md#L9",
+            "wiki/datasets/datasets-and-evaluation.md#L21",
+            "wiki/sources/S04.md#L12",
+            "wiki/sources/S07.md#L12",
+            "wiki/datasets/datasets-and-evaluation.md#L3",
+            "wiki/sources/S01.md#L12",
+            "wiki/sources/S07.md#L1"
+          ]
+        }
+      ],
+      "correction_retries": 0
+    },
+    {
+      "number": 12,
+      "title": "總結、小測驗與參考資料",
+      "learning_objectives": [
+        "回顧兩種語音辨識任務與線索的不確定性。",
+        "練習從重點追溯 Wiki 與原始來源編號。"
+      ],
+      "explanation": "先回答問題，再打開證據，核對答案與簡化示意。",
+      "key_points": [
+        {
+          "id": "12.1",
+          "text": "語音情緒辨識（Speech Emotion Recognition, SER）利用語音線索估計說話時表現出的情緒。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/ser-fundamentals.md",
+              "passage_id": "wiki/concepts/ser-fundamentals.md#L1",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§1, pp. 1–2 and §4, p. 8",
+              "excerpt": "Speech emotion recognition (SER) uses cues in speech to estimate expressed emotion. Automatic speech recognition (ASR) identifies the sequence of sounds and words spoken. The same recording can be input to either task, with different outputs. [S01], §1, pp. 1–2 and §4, p. 8."
+            }
+          ]
+        },
+        {
+          "id": "12.2",
+          "text": "自動語音辨識（Automatic Speech Recognition, ASR）辨識說出的語音與詞語序列。同一段錄音可以用於 SER 和 ASR。",
+          "kind": "concept",
+          "evidence": [
+            {
+              "path": "wiki/concepts/ser-fundamentals.md",
+              "passage_id": "wiki/concepts/ser-fundamentals.md#L1",
+              "block": 1,
+              "source_id": "S01",
+              "location": "§1, pp. 1–2 and §4, p. 8",
+              "excerpt": "Speech emotion recognition (SER) uses cues in speech to estimate expressed emotion. Automatic speech recognition (ASR) identifies the sequence of sounds and words spoken. The same recording can be input to either task, with different outputs. [S01], §1, pp. 1–2 and §4, p. 8."
+            }
+          ]
+        },
+        {
+          "id": "12.3",
+          "text": "音高、訊號強度與說話的時間變化都可能提供線索。高音高可以伴隨不同的高喚起情緒，單靠音高無法判定情緒類別。",
+          "kind": "review_synthesis",
+          "evidence": [
+            {
+              "path": "wiki/concepts/ser-fundamentals.md",
+              "passage_id": "wiki/concepts/ser-fundamentals.md#L1",
+              "block": 2,
+              "source_id": "S01",
+              "location": "§§2.2–2.3, pp. 3–4",
+              "excerpt": "The review describes changes in fundamental frequency (F0), signal intensity, and timing as cues that can vary with emotion in complex ways. It discusses higher average F0 in high-arousal speech and gives both anger and happiness as examples. A higher pitch alone therefore gives no unique emotion label. [S01], §§2.2–2.3, pp. 3–4."
+            }
+          ]
+        }
+      ],
+      "visual": {
+        "kind": "quiz",
+        "description": "選擇一題，先口頭回答，再核對對應的重點與引用。"
+      },
+      "retrieval": [
+        {
+          "query": "SER ASR same recording single higher pitch unique emotion label",
+          "limit": 10,
+          "status": "dry_run",
+          "deterministic_sufficiency": "pass",
+          "semantic_sufficiency": "skipped",
+          "retrieved_ids": [
+            "wiki/concepts/ser-fundamentals.md#L1",
+            "wiki/models/ser-models.md#L7",
+            "wiki/sources/S01.md#L12",
+            "wiki/datasets/datasets-and-evaluation.md#L3",
+            "wiki/datasets/datasets-and-evaluation.md#L21",
+            "wiki/sources/S02.md#L12",
+            "wiki/concepts/ser-limitations.md#L9",
+            "wiki/concepts/emotion-representations.md#L18",
+            "wiki/index.md#L3",
+            "wiki/concepts/emotion-representations.md#L1"
+          ]
+        }
+      ],
+      "correction_retries": 0,
+      "quiz": [
+        {
+          "question": "哪一種任務要辨識說出的詞語？",
+          "answer_claim_id": "12.2"
+        },
+        {
+          "question": "為什麼不能只靠較高音高判定情緒？",
+          "answer_claim_id": "12.3"
+        }
+      ],
+      "reference_sources": [
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07"
+      ]
+    }
+  ],
+  "unapproved": [
+    {
+      "slide": 10,
+      "topic": "UAR",
+      "status": "unapproved",
+      "correction_retries": 1,
+      "reason": "No checked UAR formula in retrieved Wiki material. Removed from slide claims after re-query."
+    }
+  ]
+}
